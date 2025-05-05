@@ -6,4 +6,11 @@ edition = "2024"
 [dependencies]
 clap = { version = "4.5.37", features = ["derive"] }
 colored = "3"
+mockito = "1.7.0"
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
 tokio = { version = "1.44.2", features = ["full"] }
+urlencoding = "2"
+
+[dev-dependencies]
+mockito = "1"

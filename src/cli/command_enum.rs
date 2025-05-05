@@ -12,4 +12,8 @@ pub enum Commands {
     },
     #[command(about = "Fix code in file")]
     Fix,
+    Search {
+        #[arg(short, long, help = "Search answer in StackOverflow", num_args = 1..)]
+        query: Vec<String>
+    }
 }
