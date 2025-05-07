@@ -15,5 +15,20 @@ pub enum Commands {
     Search {
         #[arg(short, long, help = "Search answer in StackOverflow", num_args = 1..)]
         query: Vec<String>
+    }, 
+    Track {
+        #[command(subcommand)]
+        action: TrackAction
     }
+}
+
+#[derive(Subcommand, Debug)]
+pub enum TrackAction {
+    Start {
+        #[arg(short, long)]
+        label: Option<String>
+    },
+    Stop,
+    Status,
+    Summary,
 }
