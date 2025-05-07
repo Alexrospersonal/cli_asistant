@@ -1,4 +1,4 @@
-use clap::Subcommand;
+use clap::{Args, Subcommand};
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
@@ -30,5 +30,11 @@ pub enum TrackAction {
     },
     Stop,
     Status,
-    Summary,
+    Summary(SummaryArgs),
+}
+
+#[derive(Debug, Args)]
+pub struct SummaryArgs {
+    #[arg(long)]
+    pub today: bool,
 }

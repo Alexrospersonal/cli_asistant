@@ -45,7 +45,7 @@ fn get_data_from_row(mut stmt: Statement) -> Result<Option<(String, DateTime<Utc
     }
 }
 
-fn get_formated_time_as_string(started_at: &DateTime<Utc>) -> String {
+pub fn get_formated_time_as_string(started_at: &DateTime<Utc>) -> String {
     let duration = Utc::now().signed_duration_since(started_at);
     let total_sec = duration.num_seconds();
 

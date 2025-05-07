@@ -11,6 +11,6 @@ pub async fn execute(cmd: TrackAction) -> Result<(), Box<dyn std::error::Error>>
         TrackAction::Start { label } => start::run(label).await,
         TrackAction::Stop => stop::run().await,
         TrackAction::Status => status::run().await,
-        TrackAction::Summary => summary::run().await,
+        TrackAction::Summary(args) => summary::run(args).await,
     }
 }
