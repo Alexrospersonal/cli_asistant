@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Subcommand)]
@@ -19,6 +20,10 @@ pub enum Commands {
     Track {
         #[command(subcommand)]
         action: TrackAction
+    },
+    Review {
+        #[arg(help = "Path to file for review")]
+        path: PathBuf
     }
 }
 

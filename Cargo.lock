@@ -232,6 +232,7 @@ dependencies = [
  "reqwest",
  "rusqlite",
  "serde",
+ "similar",
  "tokio",
  "urlencoding",
 ]

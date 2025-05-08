@@ -13,6 +13,7 @@ tokio = { version = "1.44.2", features = ["full"] }
 urlencoding = "2"
 rusqlite = { version = "0.35.0", features = ["bundled"] }
 chrono = "0.4.41"
+similar = "2.7.0"
 
 [dev-dependencies]
 mockito = "1"
