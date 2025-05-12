@@ -5,3 +5,4 @@ mod search;
 mod track;
 mod review;
 mod repl;
+mod generate;

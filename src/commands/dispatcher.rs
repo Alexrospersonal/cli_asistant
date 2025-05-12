@@ -1,6 +1,6 @@
 use std::error::Error;
 use crate::cli::command_enum::Commands;
-use crate::commands::{analyze, fix, search, track, review, repl};
+use crate::commands::{analyze, fix, search, track, review, repl, generate};
 
 pub async fn dispatch(cmd:Commands) -> Result<(), Box<dyn Error>> {
     match cmd {
@@ -17,5 +17,6 @@ pub async fn dispatch_no_repl(cmd:Commands) -> Result<(), Box<dyn Error>> {
         Commands::Track { action} => track::execute(action).await,
         Commands::Review {path} => review::execute(path).await,
         Commands::Repl => Err("Command repl already run".into()),
+        Commands::Generate {prompt} => generate::execute(prompt).await,
     }
 }

@@ -27,6 +27,11 @@ pub enum Commands {
     },
     #[command(about = "Start interactive assistant mode")]
     Repl,
+    #[command(about = "Send prompt to OpenAI")]
+    Generate {
+        #[arg(help = "Prompt to generate file")]
+        prompt: String
+    }
 }
 
 #[derive(Subcommand, Debug)]
