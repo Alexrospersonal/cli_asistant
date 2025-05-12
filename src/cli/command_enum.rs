@@ -24,7 +24,9 @@ pub enum Commands {
     Review {
         #[arg(help = "Path to file for review")]
         path: PathBuf
-    }
+    },
+    #[command(about = "Start interactive assistant mode")]
+    Repl,
 }
 
 #[derive(Subcommand, Debug)]
