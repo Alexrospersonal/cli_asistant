@@ -14,8 +14,13 @@ pub async fn execute(path: String, flag: String) -> Result<(), Box<dyn Error>> {
         }
         println!("Index: {} {}",idx.to_string().yellow(), line.green());
     }
+    
+    let prompt = "Please analyze the following code and provide detailed suggestions for improvements,\
+    optimizations, or best practices. Do not modify the code itself, just give recommendations.: \n\n";
+    
+    let message_to_ai = format!("{prompt} {file}");
 
-    let suggestion = fetch_suggestion_from_api(&file).await?;
+    let suggestion = fetch_suggestion_from_api(&message_to_ai).await?;
     println!("Purpose from AI: {}", suggestion.blue());
     
     Ok(())

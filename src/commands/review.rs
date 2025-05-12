@@ -3,10 +3,20 @@ use std::path::PathBuf;
 use colored::{Color, Colorize};
 use dialoguer::Confirm;
 use similar::{ChangeTag, TextDiff};
+use crate::services::openai::fetch_suggestion_from_api;
 
 pub async fn execute(path_buf: PathBuf) -> Result<(), Box<dyn Error>> {
     let original_file = tokio::fs::read_to_string(&path_buf).await?;
-    let suggestion = mock_ai_suggestion(&original_file);
+
+    let prompt = 
+        "Please review the following code and propose actual improvements by fully rewriting the code if necessary.\
+        Return only the improved version of the code, without explanations.: \n\n";
+
+    let message_to_ai = format!("{prompt} {original_file}");
+
+
+    // let suggestion = mock_ai_suggestion(&original_file);
+    let suggestion = fetch_suggestion_from_api(&message_to_ai).await?;
 
     print_diff_to_cli(&original_file, &suggestion);
     
