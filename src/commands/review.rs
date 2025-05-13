@@ -6,39 +6,81 @@ use similar::{ChangeTag, TextDiff};
 use crate::services::openai::fetch_suggestion_from_api;
 
 pub async fn execute(path_buf: PathBuf) -> Result<(), Box<dyn Error>> {
-    let original_file = tokio::fs::read_to_string(&path_buf).await?;
+    loop {
+        let original_file = tokio::fs::read_to_string(&path_buf).await?;
 
-    let prompt = 
-        "Please review the following code and propose actual improvements by fully rewriting the code if necessary.\
+        let prompt =
+            "Please review the following code and propose actual improvements by fully rewriting the code if necessary.\
         Return only the improved version of the code, without explanations.: \n\n";
+        
+        let message_to_ai = format!("{prompt} {original_file}");
+        let suggestion = fetch_suggestion_from_api(&message_to_ai).await?;
 
-    let message_to_ai = format!("{prompt} {original_file}");
+        let diff = TextDiff::from_lines(&original_file, &suggestion);
 
+        if diff.ratio() == 1.0 {
+            println!("{}", "Ai assistant not changing your code".yellow());
+            break;
+        }
 
-    // let suggestion = mock_ai_suggestion(&original_file);
-    let suggestion = fetch_suggestion_from_api(&message_to_ai).await?;
+        print_diff_to_cli(&original_file, &suggestion);
 
-    print_diff_to_cli(&original_file, &suggestion);
-    
-    let review_name = format!("review_{}.diff", chrono::Utc::now().timestamp());
-    let diff_as_string = create_diff_string(&original_file, &suggestion);
+        let apply = Confirm::new()
+                .with_prompt(format!("Apply changes to {}?", &path_buf.display()))
+                .default(false)
+                .interact()?;
 
-    let apply = Confirm::new()
-        .with_prompt(format!("Apply changes to {}?", &path_buf.display()))
-        .default(false)
-        .interact()?;
-
-    if apply {
-        tokio::fs::write(&path_buf, suggestion).await?;
-        save_diff_to_temp_file(review_name, diff_as_string).await?;
-        println!("✅ Changes applied to: {}", path_buf.display());
-    } else {
-        println!("❌ Changes were not applied.");
+        if apply {
+            let review_name = format!("review_{}.diff", chrono::Utc::now().timestamp());
+            let diff_as_string = create_diff_string(&original_file, &suggestion);
+            
+            tokio::fs::write(&path_buf, suggestion).await?;
+            save_diff_to_temp_file(review_name, diff_as_string).await?;
+            
+            println!("✅ Changes applied to: {}", path_buf.display());
+        } else {
+            break;
+        }
+        
     }
     
-
     Ok(())
 }
+
+// pub async fn execute(path_buf: PathBuf) -> Result<(), Box<dyn Error>> {
+//     let original_file = tokio::fs::read_to_string(&path_buf).await?;
+// 
+//     let prompt = 
+//         "Please review the following code and propose actual improvements by fully rewriting the code if necessary.\
+//         Return only the improved version of the code, without explanations.: \n\n";
+// 
+//     let message_to_ai = format!("{prompt} {original_file}");
+// 
+// 
+//     // let suggestion = mock_ai_suggestion(&original_file);
+//     let suggestion = fetch_suggestion_from_api(&message_to_ai).await?;
+// 
+//     print_diff_to_cli(&original_file, &suggestion);
+//     
+//     let review_name = format!("review_{}.diff", chrono::Utc::now().timestamp());
+//     let diff_as_string = create_diff_string(&original_file, &suggestion);
+// 
+//     let apply = Confirm::new()
+//         .with_prompt(format!("Apply changes to {}?", &path_buf.display()))
+//         .default(false)
+//         .interact()?;
+// 
+//     if apply {
+//         tokio::fs::write(&path_buf, suggestion).await?;
+//         save_diff_to_temp_file(review_name, diff_as_string).await?;
+//         println!("✅ Changes applied to: {}", path_buf.display());
+//     } else {
+//         println!("❌ Changes were not applied.");
+//     }
+//     
+// 
+//     Ok(())
+// }
 
 fn print_diff_to_cli(old: &str, new: &str) {
     let diff = TextDiff::from_lines(old, new);
@@ -83,12 +125,4 @@ async fn save_diff_to_temp_file(review_name: String, file: String) -> Result<(),
     println!("✅ Diff saved to: {}", &temp_path.display());
     
     Ok(())
-}
-
-fn mock_ai_suggestion(file: &str) -> String {
-    file
-        .lines()
-        .map(|row| format!("{row} // suggested"))
-        .collect::<Vec<_>>()
-        .join("\n")
 }
