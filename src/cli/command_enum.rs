@@ -23,7 +23,15 @@ pub enum Commands {
     },
     Review {
         #[arg(help = "Path to file for review")]
-        path: PathBuf
+        path: PathBuf,
+        #[arg(long, help = "Review code without changing file")]
+        dry_run:bool,
+        #[arg(long, help = "Max cycling value")]
+        max_loop: Option<u32>,
+        #[arg(long, help = "Directory to save diffs")]
+        output_dir: Option<PathBuf>,
+        #[arg(long, help = "Apply all changes without confirmation")]
+        no_confirm: bool
     },
     #[command(about = "Start interactive assistant mode")]
     Repl,

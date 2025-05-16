@@ -15,7 +15,13 @@ pub async fn dispatch_no_repl(cmd:Commands) -> Result<(), Box<dyn Error>> {
         Commands::Fix => fix::execute().await,
         Commands::Search {query} => search::execute(query).await,
         Commands::Track { action} => track::execute(action).await,
-        Commands::Review {path} => review::execute(path).await,
+        Commands::Review {
+            path,
+            dry_run,
+            max_loop,
+            output_dir,
+            no_confirm
+        } => review::execute(path, dry_run, max_loop, output_dir, no_confirm).await,
         Commands::Repl => Err("Command repl already run".into()),
         Commands::Generate {prompt} => generate::execute(prompt).await,
     }

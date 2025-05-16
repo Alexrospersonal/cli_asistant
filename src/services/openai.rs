@@ -1,13 +1,13 @@
-use std::env;
-use std::error::Error;
 use dotenvy::dotenv;
 use reqwest::Client;
-use serde_json::json;
 use serde::Deserialize;
+use serde_json::json;
+use std::env;
+use std::error::Error;
 
 #[derive(Deserialize)]
 struct ChatResponse {
-    choices: Vec<Choice>
+    choices: Vec<Choice>,
 }
 
 #[derive(Deserialize)]
@@ -19,8 +19,6 @@ struct Choice {
 struct Message {
     content: String,
 }
-
-
 
 pub async fn fetch_suggestion_from_api(prompt: &str) -> Result<String, Box<dyn Error>> {
     let env = dotenv().ok();
@@ -46,14 +44,23 @@ pub async fn fetch_suggestion_from_api(prompt: &str) -> Result<String, Box<dyn E
                 }
             ]
         }))
-        .send().await?;
-    
+        .send()
+        .await?;
+
     // let body = res.text().await?;
-    
+
     let body = res.json::<ChatResponse>().await?;
-    let answer = body.choices.get(0)
+    let answer = body
+        .choices
+        .get(0)
         .map(|c| c.message.content.clone())
         .unwrap_or_else(|| "No response from model.".to_string());
-    
+
     Ok(answer)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_fetch_suggestion_from_api() {}
 }
