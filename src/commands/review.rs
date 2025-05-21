@@ -1,10 +1,11 @@
-use crate::services::openai::fetch_suggestion_from_api;
+use crate::services::openai::{fetch_suggestion_from_api, DEFAULT_OPENAI_API_URL};
 use colored::{Color, Colorize};
 use dialoguer::Confirm;
 use similar::{ChangeTag, TextDiff};
 use std::env;
 use std::error::Error;
 use std::path::PathBuf;
+use tracing::{error, info, warn};
 
 pub async fn execute(
     path_buf: PathBuf,
@@ -23,18 +24,33 @@ pub async fn execute(
             break;
         }
 
-        let original_file = tokio::fs::read_to_string(&path_buf).await?;
+        let original_file = match tokio::fs::read_to_string(&path_buf).await {
+            Ok(file) => file,
+            Err(e) => {
+                error!("❌ Failed to read file: {}", e);
+                return Err(e.into());
+            }
+        };
+
+        info!("Starting review for file: {}", path_buf.display());
 
         let prompt = "Please review the following code and propose actual improvements by fully rewriting the code if necessary.\
         Return only the improved version of the code, without explanations.: \n\n";
 
         let message_to_ai = format!("{prompt} {original_file}");
-        let suggestion = fetch_suggestion_from_api(&message_to_ai).await?;
+        let suggestion =
+            match fetch_suggestion_from_api(&message_to_ai, DEFAULT_OPENAI_API_URL).await {
+                Ok(s) => s,
+                Err(e) => {
+                    error!("❌ OpenAI error: {}", e);
+                    return Err(e.into());
+                }
+            };
 
         let diff = TextDiff::from_lines(&original_file, &suggestion);
 
         if diff.ratio() == 1.0 {
-            println!("{}", "Ai assistant not changing your code".yellow());
+            warn!("🟡 AI did not change the code.");
             break;
         }
 

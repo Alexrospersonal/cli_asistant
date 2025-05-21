@@ -4,13 +4,21 @@ mod cli;
 mod commands;
 mod services;
 
-use std::error::Error;
 use clap::Parser;
-use cli::args::{Args};
+use cli::args::Args;
 use commands::dispatcher::dispatch;
+use std::error::Error;
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .with_level(true)
+        .compact()
+        .init();
+
     let args = Args::parse();
     run(args).await.expect("Parsing failed");
 }
@@ -21,16 +29,4 @@ async fn run(args: Args) -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn test_analyze_parsing() {
-    // let args = Args::parse_from([
-    //     "test_bin", "analyze", "./main.rs", "--flag", "fast"
-    // ]);
-
-    // match args.command {
-    //     Some(Commands::Analyze { path, flag}) => {
-    //         assert_eq!(path, "./main.rs");
-    //         assert_eq!(flag, "fast");
-    //     }
-    //     _ => panic!("Analyze command not parsed")
-    // }
-}
+fn test_analyze_parsing() {}
